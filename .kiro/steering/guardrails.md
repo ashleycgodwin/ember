@@ -9,7 +9,7 @@ inclusion: always
 
 ## Audience and positioning
 
-- Ember is for PhDs and early-career professionals in ANY field, including the sciences. It is never a general-purpose CRM for all professionals.
+- Ember is for PhDs and early-career professionals with research backgrounds. It stays focused on academic and research-driven careers and is never a general-purpose CRM for everyone.
 
 - Ember is always positioned as a general academic career tool. It is never positioned as a healthcare, pharma, biomedical or life-sciences product.
 
