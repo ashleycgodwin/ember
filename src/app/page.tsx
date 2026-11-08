@@ -1,69 +1,121 @@
-import Image from "next/image";
+/**
+ * Ember — home page (Server Component)
+ *
+ * Contact data and dates are static strings — no new Date() on the server.
+ * CardStackClient defers state computation to the browser after hydration,
+ * which is where live date comparisons belong.
+ */
+
+import CardStackClient from "@/components/card/CardStackClient";
+import { DEFAULT_THRESHOLDS } from "@/lib/thresholds";
+import type { Contact } from "@/types/contact";
+
+// ── Demo contacts ─────────────────────────────────────────────────────────────
+// Dates chosen so that, relative to late 2026, each contact is in a
+// different card state. Update these as needed for demos.
+const DEMO_CONTACTS: Contact[] = [
+  {
+    id: "demo-1",
+    name: "Dr. Elena Vasquez",
+    institution: "MIT",
+    field: "Computational Materials Science",
+    roleType: "advisor_pi",                // threshold = 14 days
+    lastContactDate: "2026-11-05",         // ~2 days ago → Glowing
+    notes:
+      "Discussed chapter 3 revisions. Enthusiastic about the new simulation approach.",
+    whereMet: "Lab, first day of PhD",
+    createdAt: "2026-01-10T09:00:00Z",
+    updatedAt: "2026-11-05T14:22:00Z",
+  },
+  {
+    id: "demo-2",
+    name: "Prof. Kwame Asante",
+    institution: "Stanford",
+    field: "Astrophysics",
+    roleType: "committee_member",          // threshold = 30 days
+    lastContactDate: "2026-10-16",         // ~22 days ago → Warm
+    notes: "Gave great feedback on the telescope array proposal.",
+    whereMet: "AAS conference, Honolulu",
+    createdAt: "2025-09-01T08:00:00Z",
+    updatedAt: "2026-10-16T11:00:00Z",
+  },
+  {
+    id: "demo-3",
+    name: "Dr. Ingrid Solberg",
+    institution: "ETH Zürich",
+    field: "Earth & Environmental Science",
+    roleType: "collaborator",              // threshold = 45 days
+    lastContactDate: "2026-09-16",         // ~52 days ago → Cooling
+    notes:
+      "Co-author on the climate modelling paper. Need to send her the revised dataset.",
+    whereMet: "EGU conference, Vienna",
+    createdAt: "2025-03-15T10:00:00Z",
+    updatedAt: "2026-09-16T09:45:00Z",
+  },
+  {
+    id: "demo-4",
+    name: "Marcus Chen",
+    institution: "DeepAtom Inc.",
+    field: "Quantum Computing",
+    roleType: "hiring_manager_recruiter",
+    recruiterMode: "active",               // threshold = 7 days
+    lastContactDate: "2026-10-27",         // ~11 days ago → Smoldering
+    notes:
+      "Reached out about a research engineer role. Follow up by end of week.",
+    whereMet: "LinkedIn cold outreach",
+    createdAt: "2026-10-20T15:00:00Z",
+    updatedAt: "2026-10-27T16:30:00Z",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div
+      className="flex flex-col min-h-screen items-center justify-center gap-12 px-4 py-16"
+      style={{ background: "var(--bg)" }}
+    >
+      {/* ── Wordmark ──────────────────────────────────────────────── */}
+      <header className="flex flex-col items-center gap-2">
+        <h1
+          className="font-typewriter text-4xl tracking-[0.18em] uppercase"
+          style={{
+            color: "rgba(245,240,232,0.92)",
+            textShadow: "0 0 24px rgba(245,158,11,0.35)",
+          }}
+        >
+          Ember
+        </h1>
+        <p
+          className="text-xs tracking-widest uppercase"
+          style={{ color: "rgba(245,240,232,0.35)" }}
+        >
+          Every connection starts with a spark
+        </p>
+      </header>
+
+      {/* ── Card stack ────────────────────────────────────────────── */}
+      <CardStackClient
+        contacts={DEMO_CONTACTS}
+        config={DEFAULT_THRESHOLDS}
+      />
+
+      {/* ── Add contact CTA ───────────────────────────────────────── */}
+      <button
+        className={[
+          "font-typewriter text-sm tracking-widest uppercase px-6 py-3 rounded-sm",
+          "transition-all duration-200",
+          "hover:scale-105 active:scale-95",
+        ].join(" ")}
+        style={{
+          background: "rgba(245,158,11,0.1)",
+          border: "1px solid rgba(245,158,11,0.35)",
+          color: "rgba(245,240,232,0.8)",
+          boxShadow: "0 0 16px rgba(245,158,11,0.12)",
+        }}
+        aria-label="Add a new contact"
+      >
+        + Add Contact
+      </button>
     </div>
   );
 }

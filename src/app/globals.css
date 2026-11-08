@@ -1,26 +1,207 @@
 @import "tailwindcss";
 
+/* ─── Design tokens ───────────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Background — deep walnut, almost black */
+  --bg:              #0f0d0b;
+  --bg-surface:      #1a1612;
+
+  /* Spindle / hardware */
+  --spindle:         #3d2e1e;
+  --spindle-shine:   #6b4e2e;
+
+  /* Card base — aged cream index card */
+  --card-cream:      #f5f0e8;
+  --card-rule:       #d6cfc2;     /* faint ruled lines */
+  --card-edge:       #e0d8cc;
+  --card-shadow:     rgba(0, 0, 0, 0.7);
+
+  /* Ink — dark brown, not pure black, for that typewriter feel */
+  --ink-primary:     #1c1410;
+  --ink-secondary:   #4a3c2e;
+  --ink-tertiary:    #7a6b5a;
+
+  /* Glow colours per card state — all amber-warm to start */
+  --glow-glowing:    #f59e0b;   /* amber-400  */
+  --glow-warm:       #d97706;   /* amber-600  */
+  --glow-cooling:    #92400e;   /* amber-900  */
+  --glow-smoldering: #57250a;   /* very dim   */
+  --glow-ash:        #2a2520;   /* barely any */
+
+  /* Glow intensity (box-shadow spread) */
+  --glow-size-glowing:    0px 0px 28px 8px;
+  --glow-size-warm:       0px 0px 20px 5px;
+  --glow-size-cooling:    0px 0px 12px 3px;
+  --glow-size-smoldering: 0px 0px 6px 2px;
+  --glow-size-ash:        0px 0px 2px 1px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ─── Base reset ──────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--card-cream);
+  font-family: var(--font-geist-sans, system-ui, sans-serif);
+  /* Subtle wood-grain noise overlay */
+  background-image:
+    radial-gradient(ellipse at 20% 80%, rgba(80, 45, 10, 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(60, 30, 5, 0.12) 0%, transparent 50%);
+}
+
+/* ─── Typewriter font utility ─────────────────────────────────────── */
+.font-typewriter {
+  font-family: var(--font-special-elite, 'Courier New', monospace);
+}
+
+/* ─── Card paper texture ──────────────────────────────────────────── */
+/*
+   Faint repeating horizontal rules like a real index card.
+   The noise SVG data URI adds paper grain without an image file.
+*/
+.card-paper {
+  background-color: var(--card-cream);
+  background-image:
+    /* paper grain */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E"),
+    /* horizontal ruled lines — every 28px */
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 26px,
+      var(--card-rule) 26px,
+      var(--card-rule) 27px
+    );
+  color: var(--ink-primary);
+}
+
+/* Red margin line on left edge — classic index card detail */
+.card-paper::before {
+  content: '';
+  position: absolute;
+  left: 52px;
+  top: 0;
+  bottom: 0;
+  width: 1.5px;
+  background: rgba(200, 80, 60, 0.35);
+  pointer-events: none;
+  border-radius: 1px;
+}
+
+/* ─── Card state glow ─────────────────────────────────────────────── */
+.card-glow-glowing {
+  box-shadow:
+    var(--glow-size-glowing) var(--glow-glowing),
+    inset 0 0 0 1px rgba(245, 158, 11, 0.3);
+}
+
+.card-glow-warm {
+  box-shadow:
+    var(--glow-size-warm) var(--glow-warm),
+    inset 0 0 0 1px rgba(217, 119, 6, 0.2);
+}
+
+.card-glow-cooling {
+  box-shadow:
+    var(--glow-size-cooling) var(--glow-cooling),
+    inset 0 0 0 1px rgba(146, 64, 14, 0.15);
+}
+
+.card-glow-smoldering {
+  box-shadow:
+    var(--glow-size-smoldering) var(--glow-smoldering),
+    0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.card-glow-ash {
+  box-shadow:
+    var(--glow-size-ash) var(--glow-ash),
+    0 4px 12px rgba(0, 0, 0, 0.4);
+  filter: grayscale(0.6) brightness(0.88);
+}
+
+/* ─── State badge colours ─────────────────────────────────────────── */
+.badge-glowing   { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.badge-warm      { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
+.badge-cooling   { background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; }
+.badge-smoldering{ background: #faf5f0; color: #7c2d12; border: 1px solid #c4a882; opacity: 0.85; }
+.badge-ash       { background: #f4f4f5; color: #71717a; border: 1px solid #d4d4d8; filter: grayscale(0.5); }
+
+/* ─── Flip animation ──────────────────────────────────────────────── */
+@keyframes card-flip-out {
+  0%   { transform: perspective(900px) rotateY(0deg);   opacity: 1; }
+  45%  { transform: perspective(900px) rotateY(90deg);  opacity: 0.4; }
+  50%  { transform: perspective(900px) rotateY(90deg);  opacity: 0;   }
+  100% { transform: perspective(900px) rotateY(90deg);  opacity: 0; }
+}
+
+@keyframes card-flip-in {
+  0%   { transform: perspective(900px) rotateY(-90deg); opacity: 0; }
+  50%  { transform: perspective(900px) rotateY(-90deg); opacity: 0; }
+  55%  { transform: perspective(900px) rotateY(-90deg); opacity: 0.4; }
+  100% { transform: perspective(900px) rotateY(0deg);   opacity: 1; }
+}
+
+@keyframes card-flip-out-back {
+  0%   { transform: perspective(900px) rotateY(0deg);    opacity: 1; }
+  45%  { transform: perspective(900px) rotateY(-90deg);  opacity: 0.4; }
+  100% { transform: perspective(900px) rotateY(-90deg);  opacity: 0; }
+}
+
+@keyframes card-flip-in-back {
+  0%   { transform: perspective(900px) rotateY(90deg);   opacity: 0; }
+  55%  { transform: perspective(900px) rotateY(90deg);   opacity: 0.4; }
+  100% { transform: perspective(900px) rotateY(0deg);    opacity: 1; }
+}
+
+.card-flip-exit-forward {
+  animation: card-flip-out 0.32s ease-in forwards;
+}
+.card-flip-enter-forward {
+  animation: card-flip-in  0.32s ease-out forwards;
+}
+.card-flip-exit-back {
+  animation: card-flip-out-back 0.32s ease-in forwards;
+}
+.card-flip-enter-back {
+  animation: card-flip-in-back  0.32s ease-out forwards;
+}
+
+/* ─── Spindle ─────────────────────────────────────────────────────── */
+.spindle-rod {
+  background: linear-gradient(
+    to right,
+    #1a1008 0%,
+    var(--spindle-shine) 35%,
+    #8c6030 50%,
+    var(--spindle-shine) 65%,
+    #1a1008 100%
+  );
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7), 0 0 2px #000 inset;
+}
+
+/* ─── Focus ring — WCAG compliant ────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid #f59e0b;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ─── Stacked-card shadow layers (depth effect) ───────────────────── */
+.card-stack-shadow-1 {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  transform: translateY(6px) translateX(-2px) rotate(-1.5deg);
+}
+.card-stack-shadow-2 {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  transform: translateY(12px) translateX(-4px) rotate(-3deg);
 }
